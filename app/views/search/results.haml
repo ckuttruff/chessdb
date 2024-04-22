@@ -1,0 +1,36 @@
+%link{ href: "css/lichess-pgn-viewer.css", rel: "stylesheet" }
+%link{ id: "piece-sprite",
+       href: "https://lichess1.org/assets/_Z92u7n/piece-css/cburnett.css",
+       rel: "stylesheet" }
+%link{ href: "https://lichess1.org/assets/_Z92u7n/css/lpv.embed.dark.min.css",
+       rel: "stylesheet" }
+
+#resultBoard.is2d
+
+#results{ "data-results" => @results.map{ |game| pgn_text(game) }.to_json }
+%script{ src: "js/result-board.js", type: "module" }
+
+%p
+  %i
+    %b Note:
+    Search includes #{Search::MAX_SEARCH_RESULTS} games. For different results, please consider narrowing your search by additional filters.
+
+
+- @results.each_with_index do |result, idx|
+  %article
+    = format_date(result['Date'])
+    %br
+
+    = "#{result['White']} vs #{result['Black']}"
+    %br
+
+    %b Event:
+    = result['Event']
+    %br
+
+    %b Result:
+    = result['Result']
+    %br
+
+    %button.button{ onclick: "loadGame(#{idx})" }
+      View Game

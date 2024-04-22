@@ -1,0 +1,22 @@
+#board.chessboard{ style: "width: 350px" }
+%script{ src: 'js/pgn-viewer.js' }
+%script{ src: 'js/pgn-editor.js' }
+
+%p
+  %form{ action: '/', method: 'post' }
+    %input{ name: 'fen', type: 'hidden' }
+    %p
+      %label Search query
+      %input{ type: 'text', name: 'query', selected: 'selected' }
+
+    %label Start Date (optional)
+    %input{ type: 'text', placeholder: 'mm/dd/yyyy', name: 'start_date' }
+
+    %label End Date (optional)
+    %input{ type: 'text', placeholder: 'mm/dd/yyyy', name: 'end_date' }
+    %br
+
+    %button{ onclick: 'setFEN()' } Search
+
+!= haml :"search/examples", layout: false
+

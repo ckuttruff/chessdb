@@ -1,0 +1,30 @@
+%h2 Query Fundamentals
+%p
+  This site utilizes Elasticsearch. Please see the following link for details about syntax:
+  != link('https://lucene.apache.org/core/7_4_0/queryparser/org/apache/lucene/queryparser/classic/package-summary.html#Overview', 'Lucene Syntax')
+
+%article
+  %h2 Basic search
+  %blockquote Carlsen
+  %blockquote "Tata Steel"
+
+%article
+  %h2 Logical Operators
+  %p
+    You can also use logical operators for more specificity
+  %blockquote "Carlsen" AND "Nakamura"
+  %blockquote "Carlsen" AND ("Nakamura" OR "Caruana")
+
+%article
+  %h2 Field Search
+  %blockquote Event:"FIDE World Blitz"
+  %p
+    Current list of fields correspond to standard required PGN metadata:
+    %ul
+      %li
+        Event, Site, Date, Round, White, Black, Result
+    As well as other metadata found in Caissabase / TWIC records:
+    %ul
+      %li
+        WhiteElo, BlackElo, ECO, EventDate, BlackFideId, BlackTitle, Opening, Variation, WhiteFideId, WhiteTitle
+
