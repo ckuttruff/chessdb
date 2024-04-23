@@ -1,11 +1,11 @@
 ## Chess DB
 
-This project is a simple Ruby / Sinatra application to leverage Elasticsearch, various chess game databases (Caissabase / This Week in Chess), and nice PGN viewers / editors to offer powerful search of millions of the top chess games throughout history.
+This project is a simple Ruby / Sinatra application to leverage Elasticsearch, various chess game databases (Caissabase / This Week in Chess, etc), and nice PGN viewers / editors to offer powerful search of millions of the top chess games throughout history.
 
 ### Features
 * Enter a board position to search openings / specific positions
 * Filter by date range, player, event, and any other PGN metadata
-* Fast! (Even on modern hardware, sophisticated searches can be run very quickly)
+* Fast! (Even on modest hardware, sophisticated searches can be run very quickly)
 * Beautiful PGN viewer / editor utilizing board tools from Lichess and @mliebelt
 
 ### Motivation
