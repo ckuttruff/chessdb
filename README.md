@@ -10,8 +10,8 @@ This project is a simple Ruby / Sinatra application to leverage Elasticsearch, v
 
 ### Motivation
 * We need more free, open-source tools around searching for chess games
-* Chessbase needs to die
-  - limited functionality, expensive, windows-only desktop app, crusty AF
+* Chessbase has problems
+  - expensive, windows-only desktop app, proprietary, limited filtering capability
 * SCID is an amazing tool, but the interface is outdated / unintuitive and applying filters is limited
 * Much appreciation to sites like chessgames.com and others, but the design is stale and search is limited
 
