@@ -1,8 +1,10 @@
 # coding: utf-8
+require 'digest'
 require 'elasticsearch'
 require 'json'
 
 class Search
+  CERT_DIR = '/home/chessdb/chessdb/config/certs'
   DB_FILE    = 'data/caissabase.pgn'
   INDEX_NAME = 'chessdb'
   RUBY_DATE_FORMAT   = "%Y%m%d-%H:%M:%S"
@@ -13,6 +15,7 @@ class Search
     @client = Elasticsearch::Client.new(
       host: "http://localhost:9200",
     )
+
     @client.transport.reload_connections!
     create_index
   end
@@ -22,28 +25,36 @@ class Search
     counter = 1
     game = {}
 
-    IO.foreach(DB_FILE) do |line|
-      new_pgn = line.start_with?('[Event "')
+    Dir["data/twic/*.pgn"].each do |file|
+      puts file
+      IO.foreach(file) do |line|
+        next if line =~ /^\s*$/
+        new_pgn = line.start_with?('[Event "')
 
-      if(new_pgn)
-        to_index << { index: { _index: INDEX_NAME, _id: get_unique_id(game), data: game }}
-        game = {}
-        counter += 1
+        if(new_pgn && !game.empty?)
+          pgn_extract_cmd = "pgn-extract --keepbroken -C --quiet -Wepd 2> /dev/null"
+          format_cmd = "cut -d' ' -f1 | sed '/^$/d'"
+          game['FENs'] = `echo "#{game['Moves']}" | #{pgn_extract_cmd} | #{format_cmd}`.strip
 
-        if(counter % 10_000 == 0 && !to_index.empty?)
-          @client.bulk(body: to_index)
-          to_index = []
+          to_index << { index: { _index: INDEX_NAME, _id: get_unique_id(game), data: game }}
+          game = {}
+          counter += 1
+
+          if(!to_index.empty? && (counter % 10_000 == 0))
+            @client.bulk(body: to_index)
+            to_index = []
+          end
+        end
+
+        if line.start_with?("[")
+          set_metadata(game, line)
+        else
+          game['Moves'] ||= ''
+          game['Moves'] += " #{line.strip}"
         end
       end
-
-      set_metadata(game, line) if line.start_with?("[")
-      if line.start_with?("1.")
-        game['Moves'] = line.strip
-        pgn_extract_cmd = "pgn-extract --keepbroken -C --quiet -Wepd"
-        format_cmd = "cut -d' ' -f1 | sed '/^$/d'"
-        game['FENs'] = `echo "#{line}" | #{pgn_extract_cmd} | #{format_cmd}`.strip
-      end
-
+      @client.bulk(body: to_index) if !to_index.empty?
+      to_index = []
     end
   end
 
@@ -63,7 +74,7 @@ class Search
 
   def get_unique_id(game)
     str = game.values_at('Event', 'Date', 'White', 'Black', 'Result', 'Moves').join
-    gameDigest::SHA2.hexdigest(str)
+    Digest::SHA2.hexdigest(str)
   end
 
   def create_index
@@ -102,7 +113,13 @@ class Search
 
   def set_metadata(game, line)
     metadata_regex = /^\[([\w]+) "(.+)"\]$/
-    match          = metadata_regex.match(line)
+    begin
+      match = metadata_regex.match(line)
+    rescue
+      puts '------------------------------------'
+      puts "parse error: #{game.inspect}"
+      return
+    end
     if(match)
       field, value = match.captures
       if %w(Date EventDate).include?(field)

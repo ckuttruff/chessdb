@@ -1,4 +1,6 @@
+/.env
 /.envrc
-/tmp
-/logs
+/config/certs
 /data/
+/logs
+/tmp
