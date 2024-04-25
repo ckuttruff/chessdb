@@ -16,8 +16,6 @@ This project is a simple Ruby / Sinatra application to leverage Elasticsearch, v
 * Much appreciation to sites like chessgames.com and others, but the design is stale and search is limited
 
 ### Future plans
-* Production deploy
-  - ensuring we have enough compute resources for demand
 * Better search interface
   - allow one to enter FEN string or edit board more easily
 * Pagination for search results
