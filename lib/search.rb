@@ -4,10 +4,9 @@ require 'elasticsearch'
 require 'json'
 
 class Search
-  CERT_DIR = '/home/chessdb/chessdb/config/certs'
-  DB_FILE    = 'data/caissabase.pgn'
-  INDEX_NAME = 'chessdb'
-  RUBY_DATE_FORMAT   = "%Y%m%d-%H:%M:%S"
+  ENGINE_ELO = 3000
+  INDEX_NAME = 'chess-db'
+  RUBY_DATE_FORMAT   = "%Y.%m.%d"
   MAX_SEARCH_RESULTS = 100
 
   attr_reader :client
@@ -15,7 +14,6 @@ class Search
     @client = Elasticsearch::Client.new(
       host: "http://localhost:9200",
     )
-
     @client.transport.reload_connections!
     create_index
   end
@@ -25,13 +23,23 @@ class Search
     counter = 1
     game = {}
 
-    Dir["data/twic/*.pgn"].each do |file|
+    Dir["data/**/*.pgn"].each do |file|
       puts file
       IO.foreach(file) do |line|
-        next if line =~ /^\s*$/
+        begin
+          next if line =~ /^\s*$/
+        rescue
+          puts line
+          next
+        end
+
         new_pgn = line.start_with?('[Event "')
 
         if(new_pgn && !game.empty?)
+          if(engine?(game['WhiteElo']) || engine?(game['BlackElo']))
+            game = {}
+            next
+          end
           pgn_extract_cmd = "pgn-extract --keepbroken -C --quiet -Wepd 2> /dev/null"
           format_cmd = "cut -d' ' -f1 | sed '/^$/d'"
           game['FENs'] = `echo "#{game['Moves']}" | #{pgn_extract_cmd} | #{format_cmd}`.strip
@@ -61,11 +69,11 @@ class Search
   def search(query, fen, start_date = nil, end_date = nil)
     start_date ||= Date.new(1, 1, 1)
     end_date   ||= Date.today
-    q = "Date:[#{date_str(start_date)} TO #{date_str(end_date, false)}]"
+    q =  %Q{Date:["#{date_str(start_date)}" TO "#{date_str(end_date)}"]}
     q += %Q{ AND FENs:"#{fen}"} unless fen.empty?
     q += %Q{ AND #{query}} unless query.empty?
 
-    @client.search(index: INDEX_NAME, q: q, sort: 'WhiteElo:desc',
+    @client.search(index: INDEX_NAME, q: q, sort: 'Date:desc',
                    size: MAX_SEARCH_RESULTS)['hits']['hits'].
       map { |res| res['_source'] }
   end
@@ -73,7 +81,7 @@ class Search
   private
 
   def get_unique_id(game)
-    str = game.values_at('Event', 'Date', 'White', 'Black', 'Result', 'Moves').join
+    str = game.values_at('Date', 'White', 'Black', 'Result', 'Moves').join
     Digest::SHA2.hexdigest(str)
   end
 
@@ -87,9 +95,9 @@ class Search
                     Site:        { type: 'text' },
                     # see java java time DateTimeFormatter docs
                     Date:        { type: 'date',
-                                   format: 'uuuuMMdd-HH:mm:ss' },
+                                   format: 'uuuu.MM.dd' },
                     EventDate:   { type: 'date',
-                                   format: 'uuuuMMdd-HH:mm:ss' },
+                                   format: 'uuuu.MM.dd' },
                     Round:       { type: 'text' },
                     Result:      { type: 'text' },
                     White:       { type: 'text' },
@@ -107,7 +115,11 @@ class Search
                     FENs:        { type: 'text' }}}}}) unless index_exists
   end
 
-  def date_str(date, start_of_day = true)
+  def engine?(elo_str)
+    elo_str && !elo_str.empty? && elo_str.to_i > ENGINE_ELO
+  end
+
+  def date_str(date)
     date.strftime(RUBY_DATE_FORMAT)
   end
 
