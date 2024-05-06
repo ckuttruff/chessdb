@@ -12,9 +12,7 @@
 
     %script{ src: 'js/jquery-3.7.1.min.js' }
 
-  %body{ class: "dark highlight brown", "data-sound-set" => "silent",
-         "data-asset-url" => "https://lichess1.org",
-         "data-asset-version" => "Z92u7n", "data-theme" => "dark", "data-piece-set" => "cburnett" }
+  %body
     %header
       %h1
         != link('/', 'Chess DB')
@@ -30,5 +28,6 @@
         %a{ href: 'http://caissabase.co.uk/' } Caissabase,
         %a{ href: 'https://github.com/lichess-org/pgn-viewer' } Lichess PGN viewer,
         %a{ href: 'https://github.com/mliebelt/pgn-viewer' } pgn-viewer,
+        %a{ href: 'https://www.cs.kent.ac.uk/people/staff/djb/pgn-extract/'} pgn-extract,
         %a{ href: 'https://theweekinchess.com/' } This Week in Chess,
         Ruby, Sinatra, and Simple CSS

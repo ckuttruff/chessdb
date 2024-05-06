@@ -4,7 +4,7 @@ var results = $('#results').data().results.
     map(result => result.join(''))
 
 export function loadGame(idx) {
-    $('div.lpv').replaceWith('<div id="resultBoard" class="is2d"></div>')
+    $('div.lpv').replaceWith('<div id="resultBoard" class="lpv"></div>')
     document.getElementById('resultBoard')
     var lpv = LichessPgnViewer(resultBoard, {
 	pgn: results[idx]

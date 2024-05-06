@@ -1,11 +1,6 @@
 %link{ href: "css/lichess-pgn-viewer.css", rel: "stylesheet" }
-%link{ id: "piece-sprite",
-       href: "https://lichess1.org/assets/_Z92u7n/piece-css/cburnett.css",
-       rel: "stylesheet" }
-%link{ href: "https://lichess1.org/assets/_Z92u7n/css/lpv.embed.dark.min.css",
-       rel: "stylesheet" }
 
-#resultBoard.is2d
+#resultBoard.lpv
 
 #results{ "data-results" => @results.map{ |game| pgn_text(game) }.to_json }
 %script{ src: "js/result-board.js", type: "module" }
@@ -27,6 +22,11 @@
     %b Event:
     = result['Event']
     %br
+
+    - if(result['Round'])
+      %b Round:
+      = result['Round']
+      %br
 
     %b Result:
     = result['Result']
