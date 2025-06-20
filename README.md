@@ -1,7 +1,5 @@
 ## Chess DB
 
-[https://chessdb.cc](https://chessdb.cc)
-
 This project is a simple Ruby / Sinatra application to leverage Elasticsearch, various chess game databases (Caissabase / This Week in Chess, etc), and nice PGN viewers / editors to offer powerful search of millions of the top chess games throughout history.
 
 ### Features
